@@ -1,5 +1,6 @@
 M_str = "1101011011"
 G_str = "10011"
+trama_completa = "11100110111110"
 
 def calcular_crc(msg_str, gen_str):
 
@@ -26,8 +27,10 @@ def calcular_crc(msg_str, gen_str):
 
 crc_remainder = calcular_crc(M_str, G_str)
 trama_transmitida = M_str + crc_remainder
+remainder_comprobacion = calcular_crc(trama_completa, G_str)
 
 print(f"Mensaje Original (M):     {M_str}")
 print(f"Polinomio Generador (G):  {G_str}")
 print(f"Residuo CRC (R):          {crc_remainder}")
 print(f"Trama Transmitida (M + R):  {trama_transmitida}")
+print(f"Comprobacion de envio correcto: {remainder_comprobacion}")
