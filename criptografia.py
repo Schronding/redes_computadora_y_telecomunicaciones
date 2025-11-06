@@ -40,11 +40,36 @@ def cifrado_lineal(mensaje, a, b):
     for letra in mensaje.lower():
         if letra in LETRAS:
             i_original = LETRAS.index(letra)
+            # Aplicamos la fórmula C = (a*P + b) % 26
             i_nuevo = (a * i_original + b) % 26
             mensaje_cod += LETRAS[i_nuevo]
         else:
             mensaje_cod += letra
     return mensaje_cod
+
+def descifrado_lineal(mensaje_cifrado, a, b):
+    if math.gcd(a, 26) != 1:
+        return (f"Error: 'a' ({a}) no es coprimo con 26. "
+                "No se puede descifrar.")
+
+
+    try:
+        a_inverso = pow(a, -1, 26)
+    except ValueError:
+        return "Error: No se pudo calcular el inverso modular."
+
+    mensaje_descifrado = ""
+    for letra in mensaje_cifrado.lower():
+        if letra in LETRAS:
+            i_cifrado = LETRAS.index(letra)
+            
+            i_nuevo = (a_inverso * (i_cifrado - b)) % 26
+            
+            mensaje_descifrado += LETRAS[i_nuevo]
+        else:
+            mensaje_descifrado += letra
+            
+    return mensaje_descifrado
 
 
 def cifrado_caotico(longitud):
@@ -88,8 +113,10 @@ def main_menu():
     print("1. Desplazamiento simple")
     print("2. Desplazamiento multiple")
     print("3. Cifrado Lineal")
-    print("4. Cifrado Caótico (Atractor de Lorenz)")
-    print("5. Salir")
+    print("4. Descifrado Lineal")
+    print("5. Cifrado Caotico (Atractor de Lorenz)")
+    print("6. Descifrado Caotico (Atractor de Lorenz)")
+    print("7. Salir")
     
     opcion = input("Selecciona una opción (1-5): ")
     return opcion
@@ -131,13 +158,24 @@ while True:
             print("Error: 'a' y 'b' deben ser números enteros.")
             
     elif opcion == '4':
+        try:
+            mensaje = input("Introduce el mensaje: ")
+            a = int(input("Introduce el valor 'a' (coprimo con 26): "))
+            b = int(input("Introduce el valor 'b': "))
+            cifrado = descifrado_lineal(mensaje, a, b)
+            print(f"Mensaje descifrado: {cifrado}")
+        except ValueError:
+            print("Error: 'a' y 'b' deben ser números enteros.")
+
+    elif opcion == '5':
         mensaje = input("Introduce el mensaje: ")
         cifrado = cifrado_caotico(mensaje)
         print(f"Mensaje cifrado: {cifrado}")
-        
-    elif opcion == '5':
+    elif opcion == '6':
+        print("todavia no esta carnal")
+    elif opcion == '7':
         print("Saliendo del programa...")
         break
         
     else:
-        print("Opción no válida. Por favor, introduce un número del 1 al 5.")
+        print("Opción no válida. Por favor, introduce un número del 1 al 7.")
