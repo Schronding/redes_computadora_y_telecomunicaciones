@@ -129,20 +129,51 @@ def hide_message(image_path, message, output_path):
                 
                 # Obtener el bit que queremos ocultar
                 bit_to_hide = int(bits_to_hide[bit_index])
+                # I don't see where we got the bits_to_hide array
+                # either. I don't understand why we need to turn 
+                # into an integer either. 
                 
                 # (r & 0b11111110) pone el último bit de R en 0
+                # I think it would not matter if we put the LSB to 1
+                # as what we want is to put the one we want, so 
+                # we will always override whatever value is already
+                # in there. 
+                # The 0b appears here too. It seems that python might
+                # have an built-in syntax to work with bits. 
                 # | bit_to_hide      añade nuestro bit (0 o 1)
                 new_r = (r & 0b11111110) | bit_to_hide
+                # I think this pipe was an or... but I don't see
+                # why would we need an or. It probably means
+                # something else. As I have 3 channels I assume that
+                # my real capacity to hide text is actually the size
+                # of the image times 3. 
                 
                 pixels[x, y] = (new_r, g, b)
                 
                 bit_index += 1
+                # This would shift one position to the right (as for what
+                # I recall images had their 0,0 in the upper-left corner
+                # but how does the program know that it has reached the 
+                # right border of the row and needs to go downwards?)
+                # It seems that my answer lies in that this whole logic is 
+                # based on a nested loop in which there is x and y. 
+                # I think I understand it now: the 'bit_index' variable counts
+                # how many bits of the picture I have covered (I wonder if this
+                # loop goes as far as it is necessary, or if it always covers
+                # the whole image). When I reach the right, this 'else' 
+                # statement below breaks the cycle of this row (x) and 
+                # continues to the next starting position in the column (y). 
+                # Once I have covered all the necessary bits (it seems that my
+                # answer is the former one; it just covers what it is necessary)
+                # it breaks both cicles and the image has been successfully 
+                # modified to hide the secret message. 
             else:
                 break
         if bit_index >= len(bits_to_hide):
             break
 
     img.save(output_path)
+    # Again I find .img instead of Image from PIL. 
     print(f"¡Mensaje ocultado! Imagen guardada en: {output_path}")
 
 def reveal_message(image_path):
@@ -150,11 +181,25 @@ def reveal_message(image_path):
     
     try:
         img = Image.open(image_path).convert('RGB')
+        # I wonder why I need to convert it to RGB. This makes me think of how
+        # a computer "see" an image in the first place. I suppose that it
+        # must be something like a matrix in which there are two tuples for 
+        # each pixel of the image: one with the position (x,y) and other for 
+        # the colors (R, G, B). This also makes me think about boxels. 
+        # If they're 3D, that means they have 6 faces (like the ones in a dice)
+        # and that each of those faces is like a picture in itself? That would
+        # make sense if the boxels were separated, but if they were together 
+        # that information of the overlapping faces would be unecessary, so it
+        # is possible to disregard it in order to save computing power. But
+        # as they might be also painted "on the inside" those parts that do not
+        # "face" or "see" the external world can probably be ignored too. 
     except Exception as e:
         print(f"Error abriendo la imagen: {e}")
         return
 
     pixels = img.load()
+    # Again I don't know where this img comes from, as I don't see anything
+    # being declared outside the scope of the functions. 
 
     width, height = img.size
     
@@ -164,15 +209,32 @@ def reveal_message(image_path):
     for y in range(height):
         for x in range(width):
             r, g, b = pixels[x, y]
+            # I suppose we put g and b to the program not to break, as we 
+            # never use the other channels. It might be possible to replace
+            # them with '_' too. 
             
             # (r & 1) nos da solo el último bit (0 o 1)
             lsb = str(r & 1)
+            # I don't understand this logic. Above I had a complex structure
+            # that seemed to change just the last bit, but in this one I 
+            # just use AND once. As this least significant bit must change
+            # only in that final position, it makes sense that everything else
+            # remains the same except that position in which there is a change
+            # ... it will always take the value of the hidden pixel... but 
+            # why am I comparing it with 1? I think this makes sense in order
+            # to not need the original picture in order to descipher the 
+            # message, but... I see, 1 is just an infinite amount of 0s and 
+            # a 1 in its LSB: That infinite amount of zeros cancels everything
+            # on my pixel except that LSB. 
             
             hidden_bits += lsb
+            # As I am just trying to reconstruct the message with the "tails"
+            # that are left in the red channel 
             
             if len(hidden_bits) % 8 == 0:
                 message = bits_to_text(hidden_bits)
                 
+
                 if message.endswith(DELIMITER):
                     return message[:-len(DELIMITER)] 
 
