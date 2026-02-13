@@ -229,16 +229,30 @@ def reveal_message(image_path):
             
             hidden_bits += lsb
             # As I am just trying to reconstruct the message with the "tails"
-            # that are left in the red channel 
+            # that are left in the red channel I can append the values in
+            # string format to create a whole string that is written in 
+            # binary. 
             
             if len(hidden_bits) % 8 == 0:
                 message = bits_to_text(hidden_bits)
-                
+                # As 1 byte = 8 bits (I think) I need to cut on these chunks
+                # of strings of 0s and 1s, in order to translate them to an 
+                # ASCII character. 
 
                 if message.endswith(DELIMITER):
                     return message[:-len(DELIMITER)] 
+                # The logic I thought about not having the same length is
+                # displayed here as the incorrect path, as the program is
+                # actively cheking for the 'DELIMITER' and in case it fails
+                # it simply returns the message up to the point in which 
+                # the delimiter is present. This makes so it doesn't matter
+                # how long the delimiter is, I can always retrieve the correct
+                # and complete message. 
 
     return "No se encontró un mensaje oculto con el delimitador."
+    # In case the 'DELIMITER' is never found, the cycle ends when the whole
+    # picture has been explored and simply returns that there wasn't a hidden
+    # message in the picture. 
 
 def main():
     while True:
@@ -253,6 +267,9 @@ def main():
         if choice == '1':
             try:
                 in_img = input("Ruta de la imagen de entrada (ej. original.png): ")
+                # As it is a bit uncomfortable to type the location character by 
+                # character, I wonder if there is a library or way I could mimic the 
+                # tab behavior of the classic terminal. 
                 
                 ruta_texto = input("Ruta del archivo de texto con el poema (ej. poema.txt): ")
                 with open(ruta_texto, 'r', encoding='utf-8') as f:
